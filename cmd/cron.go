@@ -4,19 +4,30 @@ import (
 	"errors"
 	"fmt"
 	"log"
-
 	request "no-more-5k/utils"
+	"sync"
 
 	"github.com/manifoldco/promptui"
+	"github.com/robfig/cron/v3"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-// runCmd represents the run command
-var runCmd = &cobra.Command{
-	Use:   "run",
-	Short: "Send message",
-	Long:  `Send message to channel on chatwork, you must set cookie and set token for it to work`,
+func worker(message string, wg *sync.WaitGroup) {
+	request.SendMessage(message)
+	defer wg.Done()
+}
+
+// cronCmd represents the cron command
+var cronCmd = &cobra.Command{
+	Use:   "cron",
+	Short: "A brief description of your command",
+	Long: `A longer description that spans multiple lines and likely contains examples
+and usage of using your command. For example:
+
+Cobra is a CLI library for Go that empowers applications.
+This application is a tool to generate the needed files
+to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if !viper.IsSet("token") || !viper.IsSet("cookie") {
 			log.Fatalln("Token or Cookie is not set!")
@@ -43,44 +54,27 @@ var runCmd = &cobra.Command{
 			return
 		}
 
-		request.SendMessage(result)
-
+		var wg sync.WaitGroup
+		wg.Add(1)
+		c := cron.New()
+		// c.AddFunc("CRON_TZ=Asia/Ho_Chi_Minh 30 16 * * *", func() { worker(&wg) })
+		c.AddFunc("CRON_TZ=Asia/Ho_Chi_Minh 55 16 * * *", func() { worker(result, &wg) })
+		c.Start()
+		fmt.Println("Cron job running...")
+		wg.Wait()
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(runCmd)
+	rootCmd.AddCommand(cronCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// runCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// cronCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// runCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// cronCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
-
-// response, err := http.PostForm(baseURL.String(), formData)
-
-// if err != nil {
-// 	fmt.Printf("Error sending message %v\n", err)
-// 	return
-// }
-
-// defer response.Body.Close()
-// body, err := ioutil.ReadAll(response.Body)
-
-// if err != nil {
-// 	fmt.Printf("Error parsing response %v\n", err)
-// 	return
-// }
-
-// fmt.Printf("%s\n", string(body))
-
-// var finalRes map[string]interface{}
-
-// json.NewDecoder(response.Body).Decode(&finalRes)
-
-// log.Println(finalRes)
