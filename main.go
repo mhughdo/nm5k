@@ -1,6 +1,6 @@
 package main
 
-import "no-more-5k/cmd"
+import "nm5/cmd"
 
 func main() {
 	cmd.Execute()

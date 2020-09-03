@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	request "no-more-5k/utils"
+	request "nm5/utils"
 	"sync"
 
 	"github.com/manifoldco/promptui"

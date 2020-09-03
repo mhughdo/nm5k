@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	request "no-more-5k/utils"
+	request "nm5/utils"
 
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
