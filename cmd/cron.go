@@ -21,13 +21,7 @@ func worker(message string, wg *sync.WaitGroup) {
 // cronCmd represents the cron command
 var cronCmd = &cobra.Command{
 	Use:   "cron",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Set a cron job at 16:47",
 	Run: func(cmd *cobra.Command, args []string) {
 		if !viper.IsSet("token") || !viper.IsSet("cookie") {
 			log.Fatalln("Token or Cookie is not set!")
@@ -58,7 +52,7 @@ to quickly create a Cobra application.`,
 		wg.Add(1)
 		c := cron.New()
 		// c.AddFunc("CRON_TZ=Asia/Ho_Chi_Minh 30 16 * * *", func() { worker(&wg) })
-		c.AddFunc("CRON_TZ=Asia/Ho_Chi_Minh 55 16 * * *", func() { worker(result, &wg) })
+		c.AddFunc("CRON_TZ=Asia/Ho_Chi_Minh 47 16 * * *", func() { worker(result, &wg) })
 		c.Start()
 		fmt.Println("Cron job running...")
 		wg.Wait()
