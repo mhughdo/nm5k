@@ -1,11 +1,12 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"log"
-
-	request "nm5/utils"
+	"nm5/utils/cli"
+	request "nm5/utils/request"
+	"os"
+	"strings"
 
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
@@ -21,29 +22,42 @@ var runCmd = &cobra.Command{
 		if !viper.IsSet("token") || !viper.IsSet("cookie") {
 			log.Fatalln("Token or Cookie is not set!")
 		}
-		var defaultMessage = "[To:4001758]Le Tuan Hiep (nick chính thức) \\n Today plan: Làm task trong sprint 3 \\n Tomorrow plan: tiếp tục làm sprint 3"
 
-		validate := func(message string) error {
-			if len(message) < 3 {
-				return errors.New("Message must have more than 3 characters")
-			}
-			return nil
+		var message string
+
+		prompt := promptui.Select{
+			Label: "message",
+			Items: []string{strings.ReplaceAll(defaultMessage, "\n", "\\n"), "Custom"},
 		}
 
-		prompt := promptui.Prompt{
-			Label:    "message",
-			Validate: validate,
-			Default:  defaultMessage,
-		}
-
-		result, err := prompt.Run()
+		index, result, err := prompt.Run()
 
 		if err != nil {
 			fmt.Printf("Prompt failed %v\n", err)
 			return
 		}
 
-		request.SendMessage(result)
+		if index == 1 {
+			// var configPath string = home + "/" + configName + "." + configType
+			messageBytes, err := cli.CaptureInputFromEditor(defaultMessage)
+			message = string(messageBytes)
+
+			if err != nil {
+				log.Fatalln("Error editing file", err)
+			}
+
+			viper.Set("message", message)
+			viper.WriteConfig()
+			if message == "" {
+				fmt.Println("Message cannot be empty")
+				os.Exit(1)
+			}
+			fmt.Printf("Message: %v\n", message)
+		} else {
+			message = result
+		}
+
+		request.SendMessage(message)
 
 	},
 }

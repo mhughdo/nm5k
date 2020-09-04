@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/cobra"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -13,6 +14,7 @@ import (
 var cfgFile string
 var configName string = ".no-more-5k"
 var configType string = "yaml"
+var defaultMessage string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -63,6 +65,10 @@ func initConfig() {
 		// Search config in home directory with name ".no-more-5k" (without extension).
 		viper.AddConfigPath(home)
 		viper.SetConfigName(configName)
+		viper.OnConfigChange(func(e fsnotify.Event) {
+			fmt.Println("Config file changed")
+		})
+		viper.WatchConfig()
 
 		var configPath string = home + "/" + configName + "." + configType
 		if err := viper.SafeWriteConfigAs(configPath); err != nil {
@@ -76,6 +82,14 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
+		defaultMessage = "[To:4001758]Le Tuan Hiep (nick chính thức)\nToday plan: Làm task trong sprint 4\nTomorrow plan: Tiếp tục làm các task trong sprint 4"
+
+		if !viper.IsSet("message") {
+			viper.Set("message", defaultMessage)
+			viper.WriteConfig()
+		} else {
+			defaultMessage = viper.GetString("message")
+		}
 		// fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
 }

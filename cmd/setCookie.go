@@ -10,9 +10,11 @@ import (
 
 // setCookieCmd represents the setCookie command
 var setCookieCmd = &cobra.Command{
-	Use:   "set-cookie [cookie]",
-	Short: "Set cookie to use when send-chat API is called, format: cwssid=abc;",
-	Long:  "Open dev tools, click on tab Application (Chrome) or Storage(firefox) > Cookies, copy cookie with key named: cwssid, then use set-cookie [cookie] to set cookie. ex: nm5 set-cookie cwssid=n9sse6jqobe91bp7um7jn7j21c;",
+	Use:     "set-cookie [cookie]",
+	Short:   "Set cookie to use when send-chat API is called",
+	Aliases: []string{"sc"},
+	Example: "nm5 set-cookie up8ri7rfmqoabgpa829efi3q90",
+	Long:    "Open dev tools, click on tab Application (Chrome) or Storage(firefox) > Cookies, copy cookie with key named: cwssid, then use set-cookie [cookie] to set cookie. ex: nm5 set-cookie n9sse6jqobe91bp7um7jn7j21c;",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) > 1 || len(args) == 0 {
 			fmt.Println("Invalid number of arguments. Expect: 1")

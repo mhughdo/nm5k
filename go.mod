@@ -3,6 +3,8 @@ module nm5
 go 1.15
 
 require (
+	github.com/atotto/clipboard v0.1.2
+	github.com/fsnotify/fsnotify v1.4.7
 	github.com/manifoldco/promptui v0.7.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/robfig/cron/v3 v3.0.1

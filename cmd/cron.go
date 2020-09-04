@@ -1,10 +1,12 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"log"
-	request "nm5/utils"
+	"nm5/utils/cli"
+	request "nm5/utils/request"
+	"os"
+	"strings"
 	"sync"
 
 	"github.com/manifoldco/promptui"
@@ -21,38 +23,50 @@ func worker(message string, wg *sync.WaitGroup) {
 // cronCmd represents the cron command
 var cronCmd = &cobra.Command{
 	Use:   "cron",
-	Short: "Set a cron job at 16:47",
+	Short: "Set a cron job to send report at 16:47",
 	Run: func(cmd *cobra.Command, args []string) {
 		if !viper.IsSet("token") || !viper.IsSet("cookie") {
 			log.Fatalln("Token or Cookie is not set!")
 		}
-		var defaultMessage = "[To:4001758]Le Tuan Hiep (nick chính thức) \\n Today plan: Làm task trong sprint 3 \\n Tomorrow plan: tiếp tục làm sprint 3"
 
-		validate := func(message string) error {
-			if len(message) < 3 {
-				return errors.New("Message must have more than 3 characters")
-			}
-			return nil
+		var message string
+
+		prompt := promptui.Select{
+			Label: "message",
+			Items: []string{strings.ReplaceAll(defaultMessage, "\n", "\\n"), "Custom"},
 		}
 
-		prompt := promptui.Prompt{
-			Label:    "message",
-			Validate: validate,
-			Default:  defaultMessage,
-		}
-
-		result, err := prompt.Run()
+		index, result, err := prompt.Run()
 
 		if err != nil {
 			fmt.Printf("Prompt failed %v\n", err)
 			return
 		}
 
+		if index == 1 {
+			messageBytes, err := cli.CaptureInputFromEditor(defaultMessage)
+			message = string(messageBytes)
+
+			if err != nil {
+				log.Fatalln("Error editing file", err)
+			}
+
+			viper.Set("message", message)
+			viper.WriteConfig()
+			if message == "" {
+				fmt.Println("Message cannot be empty")
+				os.Exit(1)
+			}
+			fmt.Printf("Message: %v\n", message)
+		} else {
+			message = result
+		}
+
 		var wg sync.WaitGroup
 		wg.Add(1)
 		c := cron.New()
 		// c.AddFunc("CRON_TZ=Asia/Ho_Chi_Minh 30 16 * * *", func() { worker(&wg) })
-		c.AddFunc("CRON_TZ=Asia/Ho_Chi_Minh 47 16 * * *", func() { worker(result, &wg) })
+		c.AddFunc("CRON_TZ=Asia/Ho_Chi_Minh 47 16 * * *", func() { worker(message, &wg) })
 		c.Start()
 		fmt.Println("Cron job running...")
 		wg.Wait()

@@ -10,8 +10,10 @@ import (
 
 // setTokenCmd represents the setToken command
 var setTokenCmd = &cobra.Command{
-	Use:   "set-token [token]",
-	Short: "Set token in config file to use when send-chat API is called.",
+	Use:     "set-token [token]",
+	Short:   "Set token in config file to use when send-chat API is called.",
+	Aliases: []string{"st"},
+	Example: "nm5 st c2aef82685a644d2bdecfc9357bda0cb7c8ce2905f519a47420f2",
 	Long: `Open dev tools on chatwork.com site, run the script code below to get token and run nm5 set-token [token]:
 			let scripts = document.getElementsByTagName('script')
 			for (const s of scripts) {

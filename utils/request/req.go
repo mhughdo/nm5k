@@ -13,10 +13,27 @@ import (
 )
 
 var apiURL string = "https://www.chatwork.com/gateway/send_chat.php"
+var cookieName string = "cwssid"
+
 var roomID string = "195481599"
+
+// var roomID string = "195722902"
 
 // SendMessage send message to specific channel on chatwork
 func SendMessage(message string) {
+	type Status struct {
+		Success bool
+		Message interface{}
+	}
+
+	type Result struct {
+		NewMessageID string `json:"new_message_id"`
+	}
+	type Response struct {
+		Status Status `json:"status"`
+		Result interface{}
+	}
+
 	baseURL, err := url.Parse(apiURL)
 
 	if err != nil {
@@ -30,6 +47,9 @@ func SendMessage(message string) {
 	baseURL.RawQuery = params.Encode()
 
 	var replacedString = strings.ReplaceAll(message, "\\n", "\n")
+	// re := regexp.MustCompile(`\r?\n`)
+	// replacedString := re.ReplaceAllString(message, `\n`)
+	// fmt.Printf("fd;fhkhfkhf %v", replacedString)
 	jsonValues, err := json.Marshal(map[string]string{
 		"text": replacedString,
 		"_t":   viper.GetString("token"),
@@ -43,8 +63,6 @@ func SendMessage(message string) {
 		"pdata": {string(jsonValues)},
 	}
 
-	fmt.Println(formData.Encode())
-
 	req, err := http.NewRequest(
 		http.MethodPost,
 		baseURL.String(),
@@ -54,7 +72,7 @@ func SendMessage(message string) {
 		log.Fatalln(err)
 	}
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8")
-	req.Header.Add("cookie", viper.GetString("cookie"))
+	req.Header.Add("cookie", fmt.Sprintf("%v=%v", cookieName, viper.GetString("cookie")))
 
 	response, err := http.DefaultClient.Do(req)
 
@@ -70,5 +88,28 @@ func SendMessage(message string) {
 		return
 	}
 
-	fmt.Printf("%s\n", string(body))
+	var parsedBody Response
+	err = json.Unmarshal(body, &parsedBody)
+	if err != nil {
+		log.Fatalln("Error parsing response", err)
+	}
+
+	if parsedBody.Status.Success != true {
+		var errMsg string
+		switch v := parsedBody.Status.Message.(type) {
+		case string:
+			errMsg = v
+		case []interface{}:
+			// for _, val := range v {
+			// 	fmt.Println(val)
+			// }
+			errMsg = v[0].(string)
+		}
+		fmt.Printf("❌  Sending report failed: %v\n", errMsg)
+
+	} else {
+		fmt.Println("✅  Sending report successfully")
+	}
+	// fmt.Printf("%s\n", string(body))
+
 }
