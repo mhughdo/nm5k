@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -21,6 +22,11 @@ var roomID string = "195481599"
 
 // SendMessage send message to specific channel on chatwork
 func SendMessage(message string) {
+	if message == "" {
+		fmt.Println("Message cannot be empty")
+		os.Exit(1)
+	}
+
 	type Status struct {
 		Success bool
 		Message interface{}

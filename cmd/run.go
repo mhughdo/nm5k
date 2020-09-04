@@ -52,6 +52,24 @@ var runCmd = &cobra.Command{
 				fmt.Println("Message cannot be empty")
 				os.Exit(1)
 			}
+
+			prompt := promptui.Select{
+				Label: "Do you want to send message now?",
+				Items: []string{"Yes", "No"},
+			}
+
+			_, confirmRes, err := prompt.Run()
+
+			if err != nil {
+				fmt.Printf("Prompt failed %v\n", err)
+				return
+			}
+
+			if confirmRes == "No" {
+				fmt.Println("❌  Sending report aborted!")
+				return
+			}
+
 			fmt.Printf("Message: %v\n", message)
 		} else {
 			message = result

@@ -23,7 +23,7 @@ func worker(message string, wg *sync.WaitGroup) {
 // cronCmd represents the cron command
 var cronCmd = &cobra.Command{
 	Use:   "cron",
-	Short: "Set a cron job to send report at 16:47",
+	Short: "Set a cron job to send report at 16:46",
 	Run: func(cmd *cobra.Command, args []string) {
 		if !viper.IsSet("token") || !viper.IsSet("cookie") {
 			log.Fatalln("Token or Cookie is not set!")
@@ -57,6 +57,24 @@ var cronCmd = &cobra.Command{
 				fmt.Println("Message cannot be empty")
 				os.Exit(1)
 			}
+
+			prompt := promptui.Select{
+				Label: "Do you want to set cron job now?",
+				Items: []string{"Yes", "No"},
+			}
+
+			_, confirmRes, err := prompt.Run()
+
+			if err != nil {
+				fmt.Printf("Prompt failed %v\n", err)
+				return
+			}
+
+			if confirmRes == "No" {
+				fmt.Println("❌  Setting cron job aborted!")
+				return
+			}
+
 			fmt.Printf("Message: %v\n", message)
 		} else {
 			message = result
@@ -66,9 +84,9 @@ var cronCmd = &cobra.Command{
 		wg.Add(1)
 		c := cron.New()
 		// c.AddFunc("CRON_TZ=Asia/Ho_Chi_Minh 30 16 * * *", func() { worker(&wg) })
-		c.AddFunc("CRON_TZ=Asia/Ho_Chi_Minh 47 16 * * *", func() { worker(message, &wg) })
+		c.AddFunc("CRON_TZ=Asia/Ho_Chi_Minh 46 16 * * *", func() { worker(message, &wg) })
 		c.Start()
-		fmt.Println("Cron job running...")
+		fmt.Println("Cron job running... Report will be sent at 16:46")
 		wg.Wait()
 	},
 }

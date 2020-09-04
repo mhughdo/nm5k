@@ -66,7 +66,7 @@ func initConfig() {
 		viper.AddConfigPath(home)
 		viper.SetConfigName(configName)
 		viper.OnConfigChange(func(e fsnotify.Event) {
-			fmt.Println("Config file changed")
+			// fmt.Println("Config file changed")
 		})
 		viper.WatchConfig()
 

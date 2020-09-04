@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-const DefaultEditor = "vim"
+const DefaultEditor = "vi"
 
 type PreferredEditorResolver func() string
 
