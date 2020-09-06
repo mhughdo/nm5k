@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"nm5/utils/request"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -10,11 +11,11 @@ import (
 
 // setTokenCmd represents the setToken command
 var setTokenCmd = &cobra.Command{
-	Use:     "set-token [token]",
+	Use:     "set-token || set-token [token]",
 	Short:   "Set token in config file to use when send-chat API is called.",
 	Aliases: []string{"st"},
-	Example: "nm5 st c2aef82685a644d2bdecfc9357bda0cb7c8ce2905f519a47420f2",
-	Long: `Open dev tools on chatwork.com site, run the script code below to get token and run nm5 set-token [token]:
+	Example: "nm5 st || nm5 st c2aef82685a644d2bdecfc9357bda0cb7c8ce2905f519a47420f2",
+	Long: `Manually: Open dev tools on chatwork.com site, run the script code below to get token and run nm5 set-token [token]:
 			let scripts = document.getElementsByTagName('script')
 			for (const s of scripts) {
      		if (s.innerText.includes('ACCESS_TOKEN')) {
@@ -28,8 +29,20 @@ var setTokenCmd = &cobra.Command{
 			}
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) > 1 || len(args) == 0 {
-			fmt.Println("Invalid number of arguments. Expect: 1")
+		if len(args) > 1 {
+			fmt.Printf("Invalid number of arguments. Expect: 1, Given: %v\n", len(args))
+			return
+		}
+
+		fmt.Println("Getting token...")
+
+		if len(args) == 0 {
+			token := request.GetToken()
+			if token != "" {
+				viper.Set("token", token)
+				viper.WriteConfig()
+				fmt.Printf("Set token successfully! Token: %v\n", token)
+			}
 			return
 		}
 

@@ -3,6 +3,7 @@ module nm5
 go 1.15
 
 require (
+	github.com/PuerkitoBio/goquery v1.5.1
 	github.com/atotto/clipboard v0.1.2
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/manifoldco/promptui v0.7.0

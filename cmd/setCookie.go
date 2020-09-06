@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"nm5/utils/request"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -25,6 +26,13 @@ var setCookieCmd = &cobra.Command{
 		viper.Set("cookie", trimCookie)
 		viper.WriteConfig()
 		fmt.Printf("Set cookie successfully! Cookie: %v\n", trimCookie)
+		fmt.Println("Getting token...")
+		token := request.GetToken()
+		if token != "" {
+			viper.Set("token", token)
+			viper.WriteConfig()
+			fmt.Printf("Set token successfully! Token: %v\n", token)
+		}
 	},
 }
 

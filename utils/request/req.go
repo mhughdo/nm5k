@@ -8,12 +8,15 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"regexp"
 	"strings"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/spf13/viper"
 )
 
-var apiURL string = "https://www.chatwork.com/gateway/send_chat.php"
+var homePage string = "https://www.chatwork.com"
+var apiURL string = homePage + "/gateway/send_chat.php"
 var cookieName string = "cwssid"
 
 var roomID string = "195481599"
@@ -83,7 +86,7 @@ func SendMessage(message string) {
 	response, err := http.DefaultClient.Do(req)
 
 	if err != nil {
-		log.Fatalln("Error making request")
+		log.Fatalf("Error making send-message request, %v\n", err)
 	}
 
 	defer response.Body.Close()
@@ -111,11 +114,64 @@ func SendMessage(message string) {
 			// }
 			errMsg = v[0].(string)
 		}
-		fmt.Printf("❌  Sending report failed: %v\n", errMsg)
+		fmt.Printf("❌  Send report failed: %v\n", errMsg)
 
 	} else {
-		fmt.Println("✅  Sending report successfully")
+		fmt.Println("✅  Send report successfully")
 	}
 	// fmt.Printf("%s\n", string(body))
 
+}
+
+// GetToken get token from chatwork and set in config file
+func GetToken() string {
+	if !viper.IsSet("cookie") {
+		log.Fatalln("Cookie not found, run nm5 sc [cookie] to set cookie")
+	}
+	var token string
+	cookie := fmt.Sprintf("%v=%v", cookieName, viper.GetString("cookie"))
+
+	req, err := http.NewRequest(http.MethodGet, homePage, nil)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	req.Header.Add("cookie", cookie)
+
+	response, err := http.DefaultClient.Do(req)
+
+	if err != nil {
+		log.Fatalf("Error making get-token request, %v\n", err)
+	}
+
+	defer response.Body.Close()
+
+	doc, err := goquery.NewDocumentFromReader(response.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	html, err := doc.Html()
+
+	if !strings.Contains(html, "ACCESS_TOKEN") {
+		log.Fatalln("Error getting token: Invalid or Expired cookie")
+	}
+
+	doc.Find("script").Each(func(i int, s *goquery.Selection) {
+		tagText := s.Text()
+
+		if strings.Contains(tagText, "ACCESS_TOKEN") {
+			tagTextArr := strings.Split(tagText, "\n")
+			for _, line := range tagTextArr {
+				if strings.Contains(line, "ACCESS_TOKEN") {
+					re := regexp.MustCompile(`\'(.*)\'`)
+					matches := re.FindStringSubmatch(line)
+					token = matches[1]
+					return
+				}
+			}
+		}
+	})
+
+	return token
 }
