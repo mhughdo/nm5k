@@ -3,8 +3,8 @@ name: Auto release bin file
 on:
   pull_request:
   push:
-    branches:
-      - master
+    tags:
+      - '*'
 
 jobs:
   release:
