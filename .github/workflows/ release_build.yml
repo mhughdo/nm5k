@@ -1,4 +1,4 @@
-name: Auto release bin file
+name: AutoRelease
 
 on:
   pull_request:
