@@ -19,8 +19,6 @@ var homePage string = "https://www.chatwork.com"
 var apiURL string = homePage + "/gateway/send_chat.php"
 var cookieName string = "cwssid"
 
-var roomID string = "195481599"
-
 // var roomID string = "195722902"
 
 // SendMessage send message to specific channel on chatwork
@@ -50,6 +48,7 @@ func SendMessage(message string) {
 		return
 	}
 
+	roomID := viper.GetString("roomID")
 	params := url.Values{}
 	params.Add("room_id", roomID)
 

@@ -15,6 +15,7 @@ var cfgFile string
 var configName string = ".no-more-5k"
 var configType string = "yaml"
 var defaultMessage string
+var roomID string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -83,12 +84,20 @@ func initConfig() {
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
 		defaultMessage = "[To:4001758]Le Tuan Hiep (nick chính thức)\nToday plan: Làm task trong sprint 4\nTomorrow plan: Tiếp tục làm các task trong sprint 4"
+		roomID = "195481599"
 
 		if !viper.IsSet("message") {
 			viper.Set("message", defaultMessage)
 			viper.WriteConfig()
 		} else {
 			defaultMessage = viper.GetString("message")
+		}
+
+		if !viper.IsSet("roomID") {
+			viper.Set("roomID", roomID)
+			viper.WriteConfig()
+		} else {
+			roomID = viper.GetString("roomID")
 		}
 		// fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
