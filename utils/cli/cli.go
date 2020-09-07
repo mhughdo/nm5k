@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-const DefaultEditor = "vi"
+const DefaultEditor = "nano"
 
 type PreferredEditorResolver func() string
 
