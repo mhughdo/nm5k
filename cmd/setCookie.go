@@ -2,7 +2,10 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+	"nm5/utils/cli"
 	"nm5/utils/request"
+	"runtime"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -17,8 +20,31 @@ var setCookieCmd = &cobra.Command{
 	Example: "nm5 set-cookie up8ri7rfmqoabgpa829efi3q90",
 	Long:    "Open dev tools, click on tab Application (Chrome) or Storage(firefox) > Cookies, copy cookie with key named: cwssid, then use set-cookie [cookie] to set cookie. ex: nm5 set-cookie n9sse6jqobe91bp7um7jn7j21c;",
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) > 1 || len(args) == 0 {
+		if len(args) > 1 {
 			fmt.Printf("Invalid number of arguments. Expect: 1, Given: %v\n", len(args))
+			return
+		}
+
+		fmt.Println("Getting cookie...")
+		if len(args) == 0 {
+			os := runtime.GOOS
+			if os != "darwin" {
+				log.Fatalln("Auto set cookie currently supports MacOS only")
+			}
+
+			cookieValue, err := cli.GetCookie()
+
+			if err != nil {
+				log.Fatalln("Error getting cookie", err)
+			}
+
+			if cookieValue == "" {
+				log.Fatalln("cwssid cookie name not found")
+			}
+
+			viper.Set("cookie", cookieValue)
+			viper.WriteConfig()
+			fmt.Printf("Set cookie successfully! Cookie: %v\n", cookieValue)
 			return
 		}
 

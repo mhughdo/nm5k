@@ -11,5 +11,6 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/viper v1.7.1
+	github.com/zellyn/kooky v0.0.0-20200206144811-607d4ccbb896
 	gopkg.in/yaml.v2 v2.2.4
 )

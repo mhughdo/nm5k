@@ -1,11 +1,16 @@
 package cli
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
+	"os/user"
 	"strings"
+	"time"
+
+	"github.com/zellyn/kooky"
 )
 
 const DefaultEditor = "nano"
@@ -95,4 +100,34 @@ func CaptureInputFromEditor(defaultMessage string) ([]byte, error) {
 	}
 
 	return bytes, nil
+}
+
+// GetCookie get cookie automatically
+func GetCookie() (string, error) {
+	domain := "www.chatwork.com"
+	cookieName := "cwssid"
+	var cookies []*kooky.Cookie
+	var err error
+
+	usr, _ := user.Current()
+
+	cookiesFile := fmt.Sprintf("%s/Library/Cookies/Cookies.binarycookies", usr.HomeDir)
+	cookies, err = kooky.ReadSafariCookies(cookiesFile, domain, "", time.Time{})
+	if len(cookies) == 0 {
+		// safari had none, try chrome
+		cookiesFile := fmt.Sprintf("%s/Library/Application Support/Google/Chrome/Default/Cookies", usr.HomeDir)
+		cookies, err = kooky.ReadChromeCookies(cookiesFile, domain, "", time.Time{})
+	}
+
+	if err != nil {
+		return "", err
+	}
+
+	for _, cookie := range cookies {
+		if cookie.Name == cookieName {
+			return cookie.Value, nil
+		}
+	}
+
+	return "", nil
 }
